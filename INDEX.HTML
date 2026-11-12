@@ -1,0 +1,1760 @@
+<!DOCTYPE html>
+<html lang="id" class="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>PsikoMath Pro - Simulasi Tes Kraepelin & Matematika Rekrutmen</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#ecfdf5',
+              100: '#d1fae5',
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Custom scrollbar & utility animations */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(156, 163, 175, 0.4);
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(156, 163, 175, 0.7);
+    }
+
+    @keyframes pulseRing {
+      0% { transform: scale(0.95); opacity: 0.8; }
+      50% { transform: scale(1.03); opacity: 1; }
+      100% { transform: scale(0.95); opacity: 0.8; }
+    }
+    .animate-pulse-ring {
+      animation: pulseRing 1.5s infinite ease-in-out;
+    }
+
+    @keyframes popIn {
+      0% { transform: scale(0.85); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .animate-pop-in {
+      animation: popIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    /* Prevent double-tap zoom on mobile keypad */
+    button {
+      touch-action: manipulation;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 min-h-screen flex flex-col transition-colors duration-200 selection:bg-emerald-500 selection:text-white">
+
+  <!-- TOP NAVBAR -->
+  <header class="sticky top-0 z-40 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800">
+    <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3 cursor-pointer" onclick="app.goHome()">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-bold shadow-lg shadow-emerald-500/20">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+          </svg>
+        </div>
+        <div>
+          <h1 class="font-extrabold text-lg tracking-tight leading-none">PsikoMath <span class="text-emerald-600 dark:text-emerald-400">Pro</span></h1>
+          <p class="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-0.5">Simulasi Rekrutmen & Tes Koran</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <!-- Sound Toggle -->
+        <button id="btn-sound" onclick="soundFX.toggle()" title="Suara Efek" class="p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition">
+          <svg id="icon-sound-on" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path>
+          </svg>
+          <svg id="icon-sound-off" class="w-5 h-5 hidden text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15zM17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"></path>
+          </svg>
+        </button>
+
+        <!-- Theme Toggle -->
+        <button onclick="app.toggleTheme()" title="Ubah Tema" class="p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition">
+          <svg id="icon-moon" class="w-5 h-5 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+          </svg>
+          <svg id="icon-sun" class="w-5 h-5 hidden dark:block text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- CUSTOM MODAL / CONFIRMATION DIALOG (No native alert/confirm) -->
+  <div id="custom-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl animate-pop-in">
+      <div class="flex items-center gap-3 mb-3">
+        <div id="modal-icon" class="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+          </svg>
+        </div>
+        <h3 id="modal-title" class="text-lg font-bold">Konfirmasi</h3>
+      </div>
+      <p id="modal-message" class="text-sm text-slate-600 dark:text-slate-300 mb-6 leading-relaxed">Apakah Anda yakin?</p>
+      <div class="flex justify-end gap-3">
+        <button id="modal-cancel" class="px-4 py-2.5 rounded-xl text-sm font-semibold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition">Batal</button>
+        <button id="modal-confirm" class="px-5 py-2.5 rounded-xl text-sm font-semibold bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-600/20 transition">Ya, Lanjutkan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT CONTAINER -->
+  <main class="flex-1 max-w-6xl w-full mx-auto px-4 py-6 md:py-10">
+
+    <!-- ========================================================= -->
+    <!-- VIEW 1: MENU UTAMA / PILIHAN MODE TES                     -->
+    <!-- ========================================================= -->
+    <section id="view-home" class="space-y-8 animate-pop-in">
+      <!-- Hero Banner -->
+      <div class="bg-gradient-to-br from-slate-900 via-slate-800 to-emerald-950 text-white rounded-3xl p-6 md:p-10 shadow-xl relative overflow-hidden">
+        <div class="absolute -right-12 -top-12 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -left-12 -bottom-12 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="relative z-10 max-w-2xl">
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 mb-4">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+            Persiapan Seleksi Kerja & BUMN
+          </span>
+          <h2 class="text-2xl md:text-4xl font-extrabold tracking-tight leading-tight mb-3">
+            Latih Kecepatan, Ketelitian & Logika Numerik Anda.
+          </h2>
+          <p class="text-slate-300 text-sm md:text-base leading-relaxed">
+            Platform simulasi psikotes standar HRD Indonesia. Dilengkapi evaluasi grafik kurva kerja Kraepelin/Pauli serta bank soal matematika dasar acak beserta pembahasan langkah demi langkah.
+          </p>
+        </div>
+      </div>
+
+      <!-- Mode Selection Cards -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        <!-- CARD MODE 1: TES KRAEPELIN / PAULI -->
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 md:p-8 shadow-sm hover:shadow-xl hover:border-emerald-500/50 transition-all flex flex-col justify-between">
+          <div>
+            <div class="flex items-start justify-between gap-4 mb-4">
+              <div class="w-12 h-12 rounded-2xl bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                </svg>
+              </div>
+              <span class="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                Kecepatan & Ketahanan
+              </span>
+            </div>
+
+            <h3 class="text-xl font-bold mb-2">1. Tes Kraepelin / Pauli (Tes Koran)</h3>
+            <p class="text-sm text-slate-600 dark:text-slate-400 mb-6 leading-relaxed">
+              Jumlahkan dua angka yang berdekatan secara vertikal dan ketik <strong>digit satuannya saja</strong> (contoh: 7 + 8 = 15 &rarr; ketik <strong>5</strong>). Otomatis pindah kolom saat terdengar aba-aba <em>"PINDAH!"</em>.
+            </p>
+
+            <!-- Configuration Form -->
+            <div class="space-y-4 bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 mb-6">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Durasi per Kolom</label>
+                  <select id="cfg-kraepelin-duration" class="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    <option value="15">15 Detik (Cepat / Standar)</option>
+                    <option value="30" selected>30 Detik (Menengah)</option>
+                    <option value="60">60 Detik (Pauli / Endurance)</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Jumlah Kolom (Lajur)</label>
+                  <select id="cfg-kraepelin-cols" class="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    <option value="10" selected>10 Kolom (Latihan Singkat)</option>
+                    <option value="15">15 Kolom (Standar)</option>
+                    <option value="20">20 Kolom (Simulasi Penuh)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Arah Pengerjaan</label>
+                <div class="grid grid-cols-2 gap-2">
+                  <label class="cursor-pointer">
+                    <input type="radio" name="kraepelin-dir" value="up" checked class="peer sr-only">
+                    <div class="text-center py-2 px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-semibold peer-checked:border-emerald-500 peer-checked:bg-emerald-50 dark:peer-checked:bg-emerald-950/60 peer-checked:text-emerald-700 dark:peer-checked:text-emerald-300 transition">
+                      &uarr; Bawah ke Atas (Kraepelin)
+                    </div>
+                  </label>
+                  <label class="cursor-pointer">
+                    <input type="radio" name="kraepelin-dir" value="down" class="peer sr-only">
+                    <div class="text-center py-2 px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-semibold peer-checked:border-emerald-500 peer-checked:bg-emerald-50 dark:peer-checked:bg-emerald-950/60 peer-checked:text-emerald-700 dark:peer-checked:text-emerald-300 transition">
+                      &darr; Atas ke Bawah (Pauli)
+                    </div>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button onclick="kraepelinGame.start()" class="w-full py-3.5 px-6 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white font-bold text-sm shadow-lg shadow-emerald-600/25 transition flex items-center justify-center gap-2">
+            <span>Mulai Tes Kraepelin / Pauli</span>
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+            </svg>
+          </button>
+        </div>
+
+        <!-- CARD MODE 2: TES MATEMATIKA DASAR REKRUTMEN -->
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 md:p-8 shadow-sm hover:shadow-xl hover:border-blue-500/50 transition-all flex flex-col justify-between">
+          <div>
+            <div class="flex items-start justify-between gap-4 mb-4">
+              <div class="w-12 h-12 rounded-2xl bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                </svg>
+              </div>
+              <span class="px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+                Penalaran & Logika
+              </span>
+            </div>
+
+            <h3 class="text-xl font-bold mb-2">2. Tes Matematika Dasar Perusahaan</h3>
+            <p class="text-sm text-slate-600 dark:text-slate-400 mb-6 leading-relaxed">
+              Simulasi tes kemampuan kuantitatif rekrutmen kerja mencakup <strong>Deret Angka</strong>, <strong>Aritmatika Cepat & Persentase</strong>, serta <strong>Soal Cerita Logika</strong> lengkap dengan pembahasan.
+            </p>
+
+            <!-- Configuration Form -->
+            <div class="space-y-4 bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 mb-6">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Jumlah Soal</label>
+                  <select id="cfg-math-count" onchange="mathQuiz.syncDefaultTime()" class="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="10" selected>10 Soal (Latihan Cepat)</option>
+                    <option value="20">20 Soal (Standar TPA)</option>
+                    <option value="30">30 Soal (Simulasi Penuh)</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Batas Waktu</label>
+                  <select id="cfg-math-time" class="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="600" selected>10 Menit</option>
+                    <option value="1200">20 Menit</option>
+                    <option value="1800">30 Menit</option>
+                    <option value="2700">45 Menit</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5">Fokus Materi</label>
+                <select id="cfg-math-topic" class="w-full px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <option value="all" selected>Campuran Lengkap (Rekomendasi HRD)</option>
+                  <option value="series">Khusus Deret Angka & Pola Bilangan</option>
+                  <option value="arithmetic">Khusus Aritmatika Cepat, Pecahan & Persen</option>
+                  <option value="word">Khusus Soal Cerita (Jarak, Perbandingan, Proyek)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <button onclick="mathQuiz.start()" class="w-full py-3.5 px-6 rounded-2xl bg-blue-600 hover:bg-blue-700 active:scale-[0.99] text-white font-bold text-sm shadow-lg shadow-blue-600/25 transition flex items-center justify-center gap-2">
+            <span>Mulai Tes Matematika Dasar</span>
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+            </svg>
+          </button>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ========================================================= -->
+    <!-- VIEW 2: ARENA TES KRAEPELIN / PAULI                       -->
+    <!-- ========================================================= -->
+    <section id="view-kraepelin" class="hidden space-y-4">
+      <!-- Top Control Bar -->
+      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4 shadow-sm">
+        <div class="flex items-center gap-4">
+          <div class="bg-emerald-50 dark:bg-emerald-950/70 border border-emerald-200 dark:border-emerald-800/80 px-4 py-2 rounded-xl">
+            <span class="block text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Kolom Aktif</span>
+            <span id="kr-col-indicator" class="font-mono text-lg font-extrabold text-slate-900 dark:text-white">1 / 10</span>
+          </div>
+          <div class="bg-slate-100 dark:bg-slate-800 px-4 py-2 rounded-xl">
+            <span class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Sisa Waktu Kolom</span>
+            <span id="kr-timer" class="font-mono text-lg font-extrabold text-slate-900 dark:text-white">00:30</span>
+          </div>
+          <div class="hidden sm:block bg-slate-100 dark:bg-slate-800 px-4 py-2 rounded-xl">
+            <span class="block text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Terjawab Kolom Ini</span>
+            <span id="kr-col-count" class="font-mono text-lg font-extrabold text-emerald-600 dark:text-emerald-400">0</span>
+          </div>
+        </div>
+
+        <button onclick="kraepelinGame.confirmFinish()" class="px-4 py-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/50 dark:hover:bg-rose-900/60 text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-800 text-xs font-bold transition">
+          Selesaikan Lebih Awal
+        </button>
+      </div>
+
+      <!-- Flash Banner "PINDAH!" -->
+      <div id="kr-pindah-banner" class="fixed inset-0 z-50 pointer-events-none hidden items-center justify-center bg-emerald-600/20 backdrop-blur-[2px]">
+        <div class="bg-emerald-600 text-white px-10 py-5 rounded-3xl shadow-2xl border-4 border-white dark:border-slate-900 transform scale-110 animate-bounce">
+          <p class="text-3xl md:text-5xl font-black tracking-widest uppercase">PINDAH!</p>
+          <p class="text-xs text-center font-semibold text-emerald-100 mt-1">Lanjut ke kolom berikutnya</p>
+        </div>
+      </div>
+
+      <!-- Main Workspace: Vertical Tape + On-screen Keypad -->
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+
+        <!-- Left / Center: Vertical Number Column Strip -->
+        <div class="md:col-span-7 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-4 md:p-6 shadow-sm flex flex-col items-center justify-center relative overflow-hidden min-h-[380px] md:min-h-[450px]">
+          <div class="text-xs font-semibold text-slate-400 dark:text-slate-500 mb-3 flex items-center gap-2">
+            <span id="kr-dir-label">Arah: Bawah &rarr; Atas</span>
+            <span>&bull;</span>
+            <span>Ketik digit satuan hasil penjumlahan</span>
+          </div>
+
+          <!-- Interactive Number Strip Container -->
+          <div id="kr-strip-container" class="relative w-full max-w-xs h-[320px] md:h-[360px] flex flex-col items-center justify-center select-none">
+            <!-- Rendered dynamically via JS -->
+          </div>
+        </div>
+
+        <!-- Right: Numeric Keypad (Touch + Visual Guide) -->
+        <div class="md:col-span-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-sm">
+          <div class="text-center mb-4">
+            <p class="text-xs font-semibold text-slate-500 dark:text-slate-400">Gunakan Keyboard (0-9) atau Sentuh Tombol</p>
+          </div>
+
+          <div class="grid grid-cols-3 gap-2.5 max-w-xs mx-auto">
+            <button onclick="kraepelinGame.handleInput(7)" class="py-4 rounded-2xl bg-slate-100 hover:bg-emerald-500 hover:text-white dark:bg-slate-800 dark:hover:bg-emerald-600 font-mono text-2xl font-bold shadow-sm active:scale-95 transition">7</button>
+            <button onclick="kraepelinGame.handleInput(8)" class="py-4 rounded-2xl bg-slate-100 hover:bg-emerald-500 hover:text-white dark:bg-slate-800 dark:hover:bg-emerald-600 font-mono text-2xl font-bold shadow-sm active:scale-95 transition">8</button>
+            <button onclick="kraepelinGame.handleInput(9)" class="py-4 rounded-2xl bg-slate-100 hover:bg-emerald-500 hover:text-white dark:bg-slate-800 dark:hover:bg-emerald-600 font-mono text-2xl font-bold shadow-sm active:scale-95 transition">9</button>
+
+            <button onclick="kraepelinGame.handleInput(4)" class="py-4 rounded-2xl bg-slate-100 hover:bg-emerald-500 hover:text-white dark:bg-slate-800 dark:hover:bg-emerald-600 font-mono text-2xl font-bold shadow-sm active:scale-95 transition">4</button>
+            <button onclick="kraepelinGame.handleInput(5)" class="py-4 rounded-2xl bg-slate-100 hover:bg-emerald-500 hover:text-white dark:bg-slate-800 dark:hover:bg-emerald-600 font-mono text-2xl font-bold shadow-sm active:scale-95 transition">5</button>
+            <button onclick="kraepelinGame.handleInput(6)" class="py-4 rounded-2xl bg-slate-100 hover:bg-emerald-500 hover:text-white dark:bg-slate-800 dark:hover:bg-emerald-600 font-mono text-2xl font-bold shadow-sm active:scale-95 transition">6</button>
+
+            <button onclick="kraepelinGame.handleInput(1)" class="py-4 rounded-2xl bg-slate-100 hover:bg-emerald-500 hover:text-white dark:bg-slate-800 dark:hover:bg-emerald-600 font-mono text-2xl font-bold shadow-sm active:scale-95 transition">1</button>
+            <button onclick="kraepelinGame.handleInput(2)" class="py-4 rounded-2xl bg-slate-100 hover:bg-emerald-500 hover:text-white dark:bg-slate-800 dark:hover:bg-emerald-600 font-mono text-2xl font-bold shadow-sm active:scale-95 transition">2</button>
+            <button onclick="kraepelinGame.handleInput(3)" class="py-4 rounded-2xl bg-slate-100 hover:bg-emerald-500 hover:text-white dark:bg-slate-800 dark:hover:bg-emerald-600 font-mono text-2xl font-bold shadow-sm active:scale-95 transition">3</button>
+
+            <div class="col-span-3">
+              <button onclick="kraepelinGame.handleInput(0)" class="w-full py-4 rounded-2xl bg-slate-100 hover:bg-emerald-500 hover:text-white dark:bg-slate-800 dark:hover:bg-emerald-600 font-mono text-2xl font-bold shadow-sm active:scale-95 transition">0</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ========================================================= -->
+    <!-- VIEW 3: ARENA TES MATEMATIKA DASAR REKRUTMEN              -->
+    <!-- ========================================================= -->
+    <section id="view-math" class="hidden space-y-6">
+      <!-- Top Bar -->
+      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4 shadow-sm">
+        <div class="flex items-center gap-3">
+          <span id="math-category-badge" class="px-3 py-1.5 rounded-xl bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 text-xs font-bold">
+            Deret Angka
+          </span>
+          <span class="text-sm font-bold text-slate-600 dark:text-slate-300">
+            Soal <span id="math-q-num" class="text-blue-600 dark:text-blue-400">1</span> dari <span id="math-q-total">10</span>
+          </span>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <div class="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 px-3.5 py-2 rounded-xl">
+            <svg class="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <span id="math-timer" class="font-mono text-sm font-extrabold">10:00</span>
+          </div>
+          <button onclick="mathQuiz.confirmFinish()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-md shadow-emerald-600/20 transition">
+            Selesai & Nilai
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Question & Navigation Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Question Card -->
+        <div class="lg:col-span-8 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 md:p-8 shadow-sm flex flex-col justify-between min-h-[380px]">
+          <div>
+            <div id="math-question-text" class="text-base md:text-lg font-semibold leading-relaxed text-slate-800 dark:text-slate-100 mb-6">
+              <!-- Question text rendered here -->
+            </div>
+
+            <!-- Options A, B, C, D -->
+            <div id="math-options-container" class="space-y-3">
+              <!-- Options rendered here -->
+            </div>
+          </div>
+
+          <!-- Bottom Controls -->
+          <div class="pt-6 mt-8 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3">
+            <button id="btn-math-prev" onclick="mathQuiz.prev()" class="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-xs font-bold transition disabled:opacity-40">
+              &larr; Sebelumnya
+            </button>
+
+            <button id="btn-math-doubt" onclick="mathQuiz.toggleDoubt()" class="px-4 py-2.5 rounded-xl border border-amber-300 dark:border-amber-700 bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 text-xs font-bold transition flex items-center gap-1.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+              <span>Ragu-ragu</span>
+            </button>
+
+            <button id="btn-math-next" onclick="mathQuiz.next()" class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition">
+              Selanjutnya &rarr;
+            </button>
+          </div>
+        </div>
+
+        <!-- Question Number Navigator -->
+        <div class="lg:col-span-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm h-fit">
+          <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-4">Navigasi Nomor Soal</h4>
+          <div id="math-nav-grid" class="grid grid-cols-5 gap-2 mb-6">
+            <!-- Number buttons rendered here -->
+          </div>
+          <div class="space-y-2 text-xs text-slate-500 dark:text-slate-400 border-t border-slate-100 dark:border-slate-800 pt-4">
+            <div class="flex items-center gap-2"><span class="w-3 h-3 rounded bg-blue-600 inline-block"></span> Sudah Dijawab</div>
+            <div class="flex items-center gap-2"><span class="w-3 h-3 rounded bg-amber-400 inline-block"></span> Ragu-ragu</div>
+            <div class="flex items-center gap-2"><span class="w-3 h-3 rounded bg-slate-200 dark:bg-slate-800 inline-block"></span> Belum Dijawab</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================= -->
+    <!-- VIEW 4: DASHBOARD HASIL & ANALISIS MENDALAM               -->
+    <!-- ========================================================= -->
+    <section id="view-results" class="hidden space-y-6 animate-pop-in">
+      <!-- Header Result Banner -->
+      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 md:p-8 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <span id="res-badge" class="inline-block px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 mb-2">
+            Laporan Evaluasi Psikotes
+          </span>
+          <h2 id="res-title" class="text-2xl md:text-3xl font-extrabold">Hasil Tes Kraepelin / Pauli</h2>
+          <p id="res-subtitle" class="text-sm text-slate-500 dark:text-slate-400 mt-1">Analisis performa kecepatan, ketelitian, dan stabilitas kerja.</p>
+        </div>
+        <div class="flex gap-3">
+          <button onclick="app.retryCurrentMode()" class="px-5 py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-sm font-bold transition">
+            Ulangi Tes
+          </button>
+          <button onclick="app.goHome()" class="px-5 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold shadow-lg shadow-emerald-600/20 transition">
+            Menu Utama
+          </button>
+        </div>
+      </div>
+
+      <!-- KRAEPELIN RESULTS CONTENT -->
+      <div id="res-kraepelin-body" class="hidden space-y-6">
+        <!-- 3 Main KPI Metrics -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Kecepatan (Panker)</span>
+            <div class="mt-2 flex items-baseline gap-2">
+              <span id="kr-res-speed" class="text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 font-mono">0</span>
+              <span class="text-xs font-semibold text-slate-500">hitungan benar / menit</span>
+            </div>
+            <p id="kr-res-speed-desc" class="text-xs text-slate-500 dark:text-slate-400 mt-2">Total: 0 benar dari 0 soal</p>
+          </div>
+
+          <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Ketelitian (Tianker)</span>
+            <div class="mt-2 flex items-baseline gap-2">
+              <span id="kr-res-accuracy" class="text-3xl font-extrabold text-blue-600 dark:text-blue-400 font-mono">0%</span>
+              <span class="text-xs font-semibold text-slate-500">akurasi jawaban</span>
+            </div>
+            <p id="kr-res-accuracy-desc" class="text-xs text-slate-500 dark:text-slate-400 mt-2">Jumlah kesalahan: 0 kali</p>
+          </div>
+
+          <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Ketahanan (Janker)</span>
+            <div class="mt-2 flex items-baseline gap-2">
+              <span id="kr-res-consistency" class="text-3xl font-extrabold text-amber-500 font-mono">0%</span>
+              <span class="text-xs font-semibold text-slate-500">indeks stabilitas</span>
+            </div>
+            <p id="kr-res-consistency-desc" class="text-xs text-slate-500 dark:text-slate-400 mt-2">Rentang terendah - tertinggi: 0</p>
+          </div>
+        </div>
+
+        <!-- Work Curve Chart & HRD Interpretation -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div class="lg:col-span-8 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <h3 class="font-bold text-base">Grafik Kurva Kerja (Per Kolom)</h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Jumlah jawaban benar tiap kolom vs garis rata-rata</p>
+              </div>
+              <div class="flex items-center gap-4 text-xs font-semibold">
+                <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span> Benar/Kolom</span>
+                <span class="flex items-center gap-1.5"><span class="w-3 h-0.5 bg-amber-500 inline-block"></span> Rata-rata</span>
+              </div>
+            </div>
+            <div class="w-full h-64 md:h-72 relative">
+              <canvas id="kraepelin-chart" class="w-full h-full"></canvas>
+            </div>
+          </div>
+
+          <div class="lg:col-span-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm flex flex-col justify-between">
+            <div>
+              <h3 class="font-bold text-base mb-3 flex items-center gap-2">
+                <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <span>Interpretasi Psikolog / HRD</span>
+              </h3>
+              <div id="kr-hrd-analysis" class="space-y-3 text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                <!-- Dynamic analysis injected here -->
+              </div>
+            </div>
+
+            <div class="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800 text-xs text-slate-400">
+              Catatan: Grafik yang stabil atau cenderung menanjak menunjukkan daya tahan stres (endurance) dan penyesuaian diri yang baik.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MATH QUIZ RESULTS CONTENT -->
+      <div id="res-math-body" class="hidden space-y-6">
+        <!-- 4 Summary Cards -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-sm">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Skor Akhir</span>
+            <p id="math-res-score" class="text-3xl font-extrabold text-blue-600 dark:text-blue-400 font-mono mt-1">0</p>
+            <span id="math-res-grade" class="text-xs font-semibold text-slate-500">Predikat: -</span>
+          </div>
+          <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-sm">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Jawaban Benar</span>
+            <p id="math-res-correct" class="text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 font-mono mt-1">0</p>
+            <span class="text-xs font-semibold text-slate-500">dari <span id="math-res-total-q">0</span> soal</span>
+          </div>
+          <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-sm">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Salah / Kosong</span>
+            <p id="math-res-wrong" class="text-3xl font-extrabold text-rose-500 font-mono mt-1">0 / 0</p>
+            <span class="text-xs font-semibold text-slate-500">perlu evaluasi</span>
+          </div>
+          <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-sm">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Kecepatan Rata-rata</span>
+            <p id="math-res-avgtime" class="text-3xl font-extrabold text-amber-500 font-mono mt-1">0d</p>
+            <span class="text-xs font-semibold text-slate-500">detik per soal</span>
+          </div>
+        </div>
+
+        <!-- Detailed Review List -->
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 md:p-8 shadow-sm">
+          <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+            <div>
+              <h3 class="text-lg font-bold">Pembahasan Lengkap Soal</h3>
+              <p class="text-xs text-slate-500 dark:text-slate-400">Pelajari pola dan rumus cepat untuk meningkatkan skor pada tes berikutnya.</p>
+            </div>
+            <div class="flex gap-2">
+              <button onclick="mathQuiz.filterReview('all')" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 dark:bg-slate-800 hover:bg-blue-500 hover:text-white transition">Semua</button>
+              <button onclick="mathQuiz.filterReview('wrong')" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 hover:bg-rose-500 hover:text-white transition">Salah / Kosong</button>
+            </div>
+          </div>
+
+          <div id="math-review-list" class="space-y-4">
+            <!-- Review items rendered here -->
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="border-t border-slate-200 dark:border-slate-800 py-6 text-center text-xs text-slate-500 dark:text-slate-400">
+    <p>PsikoMath Pro &copy; 2026 &mdash; Simulator Psikotes Kraepelin/Pauli & Matematika Dasar Rekrutmen Kerja.</p>
+  </footer>
+
+  <!-- ========================================================= -->
+  <!-- JAVASCRIPT APPLICATION LOGIC                              -->
+  <!-- ========================================================= -->
+  <script>
+    /**
+     * 1. WEB AUDIO API SOUND SYNTHESIZER (No external audio files)
+     */
+    const soundFX = {
+      enabled: true,
+      ctx: null,
+
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (AudioContext) this.ctx = new AudioContext();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      },
+
+      toggle() {
+        this.enabled = !this.enabled;
+        document.getElementById('icon-sound-on').classList.toggle('hidden', !this.enabled);
+        document.getElementById('icon-sound-off').classList.toggle('hidden', this.enabled);
+        if (this.enabled) this.playTap();
+      },
+
+      playTap() {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(620, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(300, this.ctx.currentTime + 0.045);
+        gain.gain.setValueAtTime(0.08, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.045);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.045);
+      },
+
+      playShift() {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+        // Double chime for "PINDAH!"
+        [0, 0.12].forEach((delay, idx) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(idx === 0 ? 587.33 : 880, this.ctx.currentTime + delay);
+          gain.gain.setValueAtTime(0.18, this.ctx.currentTime + delay);
+          gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + delay + 0.25);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(this.ctx.currentTime + delay);
+          osc.stop(this.ctx.currentTime + delay + 0.25);
+        });
+      },
+
+      playFinish() {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+        const notes = [523.25, 659.25, 783.99, 1046.50];
+        notes.forEach((freq, i) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, this.ctx.currentTime + i * 0.09);
+          gain.gain.setValueAtTime(0.12, this.ctx.currentTime + i * 0.09);
+          gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + i * 0.09 + 0.35);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(this.ctx.currentTime + i * 0.09);
+          osc.stop(this.ctx.currentTime + i * 0.09 + 0.35);
+        });
+      }
+    };
+
+    /**
+     * 2. CORE APP NAVIGATION, THEME & MODAL CONTROLLER
+     */
+    const app = {
+      currentMode: null, // 'kraepelin' | 'math'
+
+      init() {
+        // Check saved or system theme
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
+        this.bindGlobalKeyboard();
+      },
+
+      toggleTheme() {
+        const isDark = document.documentElement.classList.toggle('dark');
+        localStorage.theme = isDark ? 'dark' : 'light';
+        // Redraw chart if currently on Kraepelin result screen
+        if (!document.getElementById('res-kraepelin-body').classList.contains('hidden')) {
+          kraepelinGame.drawChart();
+        }
+      },
+
+      switchView(viewId) {
+        ['view-home', 'view-kraepelin', 'view-math', 'view-results'].forEach(id => {
+          document.getElementById(id).classList.add('hidden');
+        });
+        document.getElementById(viewId).classList.remove('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      },
+
+      goHome() {
+        if (kraepelinGame.isRunning) {
+          this.showModal('Keluar dari Tes?', 'Progres Tes Kraepelin Anda saat ini tidak akan disimpan. Yakin kembali ke menu utama?', () => {
+            kraepelinGame.stopTimers();
+            this.currentMode = null;
+            this.switchView('view-home');
+          });
+          return;
+        }
+        if (mathQuiz.isRunning) {
+          this.showModal('Keluar dari Tes?', 'Progres Tes Matematika Anda saat ini tidak akan disimpan. Yakin kembali ke menu utama?', () => {
+            mathQuiz.stopTimer();
+            this.currentMode = null;
+            this.switchView('view-home');
+          });
+          return;
+        }
+        this.currentMode = null;
+        this.switchView('view-home');
+      },
+
+      retryCurrentMode() {
+        if (this.currentMode === 'kraepelin') {
+          kraepelinGame.start();
+        } else if (this.currentMode === 'math') {
+          mathQuiz.start();
+        } else {
+          this.goHome();
+        }
+      },
+
+      showModal(title, message, onConfirm) {
+        const modal = document.getElementById('custom-modal');
+        document.getElementById('modal-title').textContent = title;
+        document.getElementById('modal-message').textContent = message;
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+
+        const btnConfirm = document.getElementById('modal-confirm');
+        const btnCancel = document.getElementById('modal-cancel');
+
+        const cleanup = () => {
+          modal.classList.add('hidden');
+          modal.classList.remove('flex');
+          btnConfirm.onclick = null;
+          btnCancel.onclick = null;
+        };
+
+        btnCancel.onclick = cleanup;
+        btnConfirm.onclick = () => {
+          cleanup();
+          if (onConfirm) onConfirm();
+        };
+      },
+
+      bindGlobalKeyboard() {
+        window.addEventListener('keydown', (e) => {
+          // Ignore if modal is open
+          if (!document.getElementById('custom-modal').classList.contains('hidden')) return;
+
+          if (kraepelinGame.isRunning) {
+            if (e.key >= '0' && e.key <= '9') {
+              e.preventDefault();
+              kraepelinGame.handleInput(parseInt(e.key, 10));
+            }
+          } else if (mathQuiz.isRunning) {
+            if (e.key === 'ArrowRight') {
+              mathQuiz.next();
+            } else if (e.key === 'ArrowLeft') {
+              mathQuiz.prev();
+            } else if (['a', 'b', 'c', 'd', 'A', 'B', 'C', 'D'].includes(e.key)) {
+              const idx = e.key.toUpperCase().charCodeAt(0) - 65;
+              mathQuiz.selectOption(idx);
+            } else if (['1', '2', '3', '4'].includes(e.key)) {
+              mathQuiz.selectOption(parseInt(e.key, 10) - 1);
+            }
+          }
+        });
+
+        window.addEventListener('resize', () => {
+          if (!document.getElementById('res-kraepelin-body').classList.contains('hidden')) {
+            kraepelinGame.drawChart();
+          }
+        });
+      }
+    };
+
+    /**
+     * 3. MODE 1: KRAEPELIN / PAULI ENGINE
+     */
+    const kraepelinGame = {
+      isRunning: false,
+      config: {
+        durationPerCol: 30,
+        totalCols: 10,
+        direction: 'up' // 'up' (bottom-to-top) or 'down' (top-to-bottom)
+      },
+      columns: [], // Array of arrays of digits (length 55 per col)
+      colStats: [], // { correct: number, wrong: number, total: number }
+      currentCol: 0,
+      currentPairIdx: 0, // Pair index (0 connects digits[0] and digits[1])
+      timeLeft: 0,
+      timerInterval: null,
+      startTime: null,
+
+      generateColumnDigits(length = 60) {
+        const arr = [];
+        let prev = -1;
+        for (let i = 0; i < length; i++) {
+          let d;
+          do {
+            d = Math.floor(Math.random() * 9) + 1; // 1 to 9 (standard Kraepelin avoids 0)
+          } while (d === prev && Math.random() > 0.25);
+          arr.push(d);
+          prev = d;
+        }
+        return arr;
+      },
+
+      start() {
+        soundFX.init();
+        app.currentMode = 'kraepelin';
+
+        this.config.durationPerCol = parseInt(document.getElementById('cfg-kraepelin-duration').value, 10);
+        this.config.totalCols = parseInt(document.getElementById('cfg-kraepelin-cols').value, 10);
+        this.config.direction = document.querySelector('input[name="kraepelin-dir"]:checked').value;
+
+        this.columns = [];
+        this.colStats = [];
+        for (let c = 0; c < this.config.totalCols; c++) {
+          this.columns.push(this.generateColumnDigits(65));
+          this.colStats.push({ correct: 0, wrong: 0, total: 0, answers: [] });
+        }
+
+        this.currentCol = 0;
+        this.currentPairIdx = 0;
+        this.timeLeft = this.config.durationPerCol;
+        this.isRunning = true;
+        this.startTime = Date.now();
+
+        document.getElementById('kr-dir-label').innerHTML = this.config.direction === 'up'
+          ? 'Arah: Bawah &rarr; Atas'
+          : 'Arah: Atas &rarr; Bawah';
+
+        app.switchView('view-kraepelin');
+        this.updateHeaderUI();
+        this.renderStrip();
+        this.startTimer();
+      },
+
+      startTimer() {
+        this.stopTimers();
+        this.timerInterval = setInterval(() => {
+          this.timeLeft--;
+          this.updateHeaderUI();
+
+          if (this.timeLeft <= 0) {
+            this.nextColumn();
+          }
+        }, 1000);
+      },
+
+      stopTimers() {
+        if (this.timerInterval) {
+          clearInterval(this.timerInterval);
+          this.timerInterval = null;
+        }
+      },
+
+      nextColumn() {
+        if (this.currentCol + 1 >= this.config.totalCols) {
+          this.finish();
+          return;
+        }
+
+        // Trigger PINDAH! visual and audio cue
+        soundFX.playShift();
+        const banner = document.getElementById('kr-pindah-banner');
+        banner.classList.remove('hidden');
+        banner.classList.add('flex');
+        setTimeout(() => {
+          banner.classList.add('hidden');
+          banner.classList.remove('flex');
+        }, 650);
+
+        this.currentCol++;
+        this.currentPairIdx = 0;
+        this.timeLeft = this.config.durationPerCol;
+        this.updateHeaderUI();
+        this.renderStrip();
+      },
+
+      handleInput(digit) {
+        if (!this.isRunning) return;
+        soundFX.playTap();
+
+        const colDigits = this.columns[this.currentCol];
+        // Extend column dynamically if candidate is super fast (>64 answers in 1 col)
+        if (this.currentPairIdx + 2 >= colDigits.length) {
+          colDigits.push(...this.generateColumnDigits(30));
+        }
+
+        const num1 = colDigits[this.currentPairIdx];
+        const num2 = colDigits[this.currentPairIdx + 1];
+        const expected = (num1 + num2) % 10;
+        const isCorrect = (digit === expected);
+
+        const stat = this.colStats[this.currentCol];
+        stat.total++;
+        if (isCorrect) {
+          stat.correct++;
+        } else {
+          stat.wrong++;
+        }
+        stat.answers.push({ user: digit, expected, isCorrect });
+
+        this.currentPairIdx++;
+        this.updateHeaderUI();
+        this.renderStrip();
+      },
+
+      updateHeaderUI() {
+        document.getElementById('kr-col-indicator').textContent = `${this.currentCol + 1} / ${this.config.totalCols}`;
+        const mins = Math.floor(this.timeLeft / 60).toString().padStart(2, '0');
+        const secs = (this.timeLeft % 60).toString().padStart(2, '0');
+        const timerEl = document.getElementById('kr-timer');
+        timerEl.textContent = `${mins}:${secs}`;
+        if (this.timeLeft <= 5) {
+          timerEl.classList.add('text-rose-500');
+        } else {
+          timerEl.classList.remove('text-rose-500');
+        }
+        document.getElementById('kr-col-count').textContent = this.colStats[this.currentCol].total;
+      },
+
+      renderStrip() {
+        const container = document.getElementById('kr-strip-container');
+        const colDigits = this.columns[this.currentCol];
+        const stat = this.colStats[this.currentCol];
+        const idx = this.currentPairIdx;
+        const isUp = this.config.direction === 'up';
+
+        // Show a window of 5 numbers around currentPairIdx: [idx-1, idx, idx+1, idx+2, idx+3]
+        const windowOffsets = [-1, 0, 1, 2, 3];
+        // For 'up' (bottom to top), higher index should appear visually higher on screen
+        const orderedOffsets = isUp ? [...windowOffsets].reverse() : windowOffsets;
+
+        let html = '<div class="relative flex flex-col items-center justify-center gap-1 w-full">';
+
+        orderedOffsets.forEach((offset) => {
+          const targetIdx = idx + offset;
+          if (targetIdx < 0) {
+            html += `<div class="h-12 flex items-center justify-center opacity-0 select-none">-</div>`;
+            return;
+          }
+
+          const val = colDigits[targetIdx];
+          const isCurrentPair = (offset === 0 || offset === 1);
+          const isPast = (offset < 0);
+
+          // Render answer badge between pairs
+          const renderAnswerSlot = (pairIndex) => {
+            if (pairIndex < 0) return '';
+            if (pairIndex === idx) {
+              // Active target slot between idx and idx+1
+              return `
+                <div class="flex items-center justify-center gap-2 my-0.5">
+                  <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400 animate-pulse">&rarr;</span>
+                  <div class="w-10 h-7 rounded-lg border-2 border-dashed border-emerald-500 bg-emerald-500/10 flex items-center justify-center font-mono text-sm font-extrabold text-emerald-600 dark:text-emerald-400">
+                    ?
+                  </div>
+                  <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400">&larr;</span>
+                </div>
+              `;
+            } else if (pairIndex < idx && stat.answers[pairIndex]) {
+              const ans = stat.answers[pairIndex];
+              const badgeColor = ans.isCorrect
+                ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 border-emerald-200 dark:border-emerald-800'
+                : 'text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/60 border-rose-200 dark:border-rose-800';
+              return `
+                <div class="flex items-center justify-center my-0.5 opacity-75">
+                  <span class="px-2 py-0.5 rounded border text-xs font-mono font-bold ${badgeColor}">
+                    ${ans.user}
+                  </span>
+                </div>
+              `;
+            }
+            return `<div class="h-2"></div>`;
+          };
+
+          // In 'up' mode, the slot for pairIndex=targetIdx sits visually BELOW digits[targetIdx+1] and ABOVE digits[targetIdx]
+          if (!isUp && offset > -1) {
+            html += renderAnswerSlot(targetIdx - 1);
+          }
+
+          html += `
+            <div class="w-28 py-1.5 rounded-2xl flex items-center justify-center font-mono transition-all ${
+              isCurrentPair
+                ? 'bg-emerald-500 text-white text-3xl font-black shadow-lg shadow-emerald-500/30 scale-105'
+                : isPast
+                  ? 'text-slate-400 dark:text-slate-600 text-xl font-semibold'
+                  : 'text-slate-700 dark:text-slate-300 text-2xl font-bold'
+            }">
+              ${val}
+            </div>
+          `;
+
+          if (isUp && offset > -1) {
+            html += renderAnswerSlot(targetIdx - 1);
+          }
+        });
+
+        html += '</div>';
+        container.innerHTML = html;
+      },
+
+      confirmFinish() {
+        app.showModal('Selesaikan Tes Sekarang?', 'Apakah Anda yakin ingin mengakhiri Tes Kraepelin lebih awal dan melihat hasil evaluasi?', () => {
+          this.finish();
+        });
+      },
+
+      finish() {
+        this.isRunning = false;
+        this.stopTimers();
+        soundFX.playFinish();
+
+        // Calculate actual elapsed minutes
+        const elapsedSec = Math.max(1, Math.round((Date.now() - this.startTime) / 1000));
+        const activeColsCount = this.currentCol + 1;
+
+        let totalCorrect = 0;
+        let totalWrong = 0;
+        let totalAnswered = 0;
+        const correctPerCol = [];
+
+        for (let i = 0; i < activeColsCount; i++) {
+          totalCorrect += this.colStats[i].correct;
+          totalWrong += this.colStats[i].wrong;
+          totalAnswered += this.colStats[i].total;
+          correctPerCol.push(this.colStats[i].correct);
+        }
+
+        // 1. Speed (Panker): correct answers per minute
+        const speedPerMin = Math.round((totalCorrect / elapsedSec) * 60);
+
+        // 2. Accuracy (Tianker): % correct
+        const accuracy = totalAnswered > 0 ? Math.round((totalCorrect / totalAnswered) * 100) : 0;
+
+        // 3. Consistency / Endurance (Janker): based on Coefficient of Variation across columns
+        const mean = correctPerCol.reduce((a, b) => a + b, 0) / correctPerCol.length;
+        const variance = correctPerCol.reduce((acc, val) => acc + Math.pow(val - mean, 2), 0) / correctPerCol.length;
+        const stdDev = Math.sqrt(variance);
+        const cv = mean > 0 ? (stdDev / mean) : 1;
+        const consistencyScore = Math.max(0, Math.min(100, Math.round((1 - cv) * 100)));
+
+        const minVal = Math.min(...correctPerCol);
+        const maxVal = Math.max(...correctPerCol);
+
+        // Populate Result UI
+        document.getElementById('res-badge').textContent = 'Laporan Evaluasi Kraepelin / Pauli';
+        document.getElementById('res-title').textContent = 'Analisis Performa Tes Koran';
+        document.getElementById('res-subtitle').textContent = `${activeColsCount} kolom dikerjakan (${this.config.durationPerCol} detik/kolom).`;
+
+        document.getElementById('kr-res-speed').textContent = speedPerMin;
+        document.getElementById('kr-res-speed-desc').textContent = `Total: ${totalCorrect} benar dari ${totalAnswered} hitungan`;
+
+        document.getElementById('kr-res-accuracy').textContent = `${accuracy}%`;
+        document.getElementById('kr-res-accuracy-desc').textContent = `Jumlah kesalahan: ${totalWrong} kali`;
+
+        document.getElementById('kr-res-consistency').textContent = `${consistencyScore}%`;
+        document.getElementById('kr-res-consistency-desc').textContent = `Rentang terendah: ${minVal} | tertinggi: ${maxVal}`;
+
+        // Generate HRD Psychological Interpretation
+        this.renderHRDAnalysis(speedPerMin, accuracy, consistencyScore, correctPerCol);
+
+        document.getElementById('res-math-body').classList.add('hidden');
+        document.getElementById('res-kraepelin-body').classList.remove('hidden');
+        app.switchView('view-results');
+
+        this.lastChartData = correctPerCol;
+        setTimeout(() => this.drawChart(), 50);
+      },
+
+      renderHRDAnalysis(speed, accuracy, consistency, data) {
+        // Trend comparison: first half vs second half
+        const mid = Math.ceil(data.length / 2);
+        const firstHalfAvg = data.slice(0, mid).reduce((a, b) => a + b, 0) / mid;
+        const secondHalf = data.slice(mid);
+        const secondHalfAvg = secondHalf.length > 0
+          ? secondHalf.reduce((a, b) => a + b, 0) / secondHalf.length
+          : firstHalfAvg;
+
+        let trendText = '';
+        if (secondHalfAvg > firstHalfAvg * 1.07) {
+          trendText = `<p><strong class="text-emerald-600 dark:text-emerald-400">Tren Grafik Menanjak:</strong> Anda memiliki daya adaptasi yang sangat baik dan energi cadangan yang meningkat seiring berjalannya waktu kerja.</p>`;
+        } else if (secondHalfAvg < firstHalfAvg * 0.88) {
+          trendText = `<p><strong class="text-amber-600 dark:text-amber-400">Tren Grafik Menurun:</strong> Terindikasi kelelahan atau penurunan fokus di paruh akhir. Atur ritme awal agar tidak terlalu terburu-buru di kolom pertama.</p>`;
+        } else {
+          trendText = `<p><strong class="text-blue-600 dark:text-blue-400">Tren Grafik Stabil:</strong> Ritme kerja Anda sangat terkendali dan konsisten dari awal hingga akhir tes.</p>`;
+        }
+
+        let speedCat = speed >= 45 ? 'Tinggi (Sangat Cekatan)' : speed >= 28 ? 'Rata-rata / Cukup Baik' : 'Perlu Ditingkatkan';
+        let accCat = accuracy >= 96 ? 'Sangat Teliti' : accuracy >= 88 ? 'Cukup Teliti' : 'Cenderung Terburu-buru';
+
+        document.getElementById('kr-hrd-analysis').innerHTML = `
+          ${trendText}
+          <p><strong>Tempo Kerja:</strong> ${speedCat} (${speed} hitungan/menit).</p>
+          <p><strong>Kualitas Ketelitian:</strong> ${accCat} (akurasi ${accuracy}%).</p>
+          <p><strong>Stabilitas Emosi:</strong> ${consistency >= 80 ? 'Sangat stabil dalam menghadapi tekanan waktu.' : 'Fluktuasi antar kolom masih terlihat, latih fokus per lajur.'}</p>
+        `;
+      },
+
+      drawChart() {
+        const canvas = document.getElementById('kraepelin-chart');
+        if (!canvas || !this.lastChartData) return;
+
+        const dpr = window.devicePixelRatio || 1;
+        const rect = canvas.parentElement.getBoundingClientRect();
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+
+        const ctx = canvas.getContext('2d');
+        ctx.scale(dpr, dpr);
+
+        const width = rect.width;
+        const height = rect.height;
+        const isDark = document.documentElement.classList.contains('dark');
+
+        const data = this.lastChartData;
+        const padding = { top: 24, right: 24, bottom: 34, left: 38 };
+        const plotW = width - padding.left - padding.right;
+        const plotH = height - padding.top - padding.bottom;
+
+        ctx.clearRect(0, 0, width, height);
+
+        const maxVal = Math.max(10, ...data) + 3;
+        const avgVal = data.reduce((a, b) => a + b, 0) / data.length;
+
+        // Grid lines & Y-axis labels
+        ctx.strokeStyle = isDark ? 'rgba(148, 163, 184, 0.15)' : 'rgba(148, 163, 184, 0.25)';
+        ctx.fillStyle = isDark ? '#94a3b8' : '#64748b';
+        ctx.font = '600 11px Inter, sans-serif';
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'middle';
+
+        const gridSteps = 5;
+        for (let i = 0; i <= gridSteps; i++) {
+          const val = Math.round((maxVal / gridSteps) * i);
+          const y = padding.top + plotH - (val / maxVal) * plotH;
+          ctx.beginPath();
+          ctx.moveTo(padding.left, y);
+          ctx.lineTo(padding.left + plotW, y);
+          ctx.stroke();
+          ctx.fillText(val, padding.left - 8, y);
+        }
+
+        // X-axis labels
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        const stepX = data.length > 1 ? plotW / (data.length - 1) : plotW / 2;
+
+        data.forEach((_, idx) => {
+          const x = data.length > 1 ? padding.left + idx * stepX : padding.left + plotW / 2;
+          ctx.fillText(`K${idx + 1}`, x, padding.top + plotH + 10);
+        });
+
+        // Average dashed line
+        const avgY = padding.top + plotH - (avgVal / maxVal) * plotH;
+        ctx.save();
+        ctx.strokeStyle = '#f59e0b';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([6, 4]);
+        ctx.beginPath();
+        ctx.moveTo(padding.left, avgY);
+        ctx.lineTo(padding.left + plotW, avgY);
+        ctx.stroke();
+        ctx.restore();
+
+        // Gradient fill under curve
+        const points = data.map((val, idx) => ({
+          x: data.length > 1 ? padding.left + idx * stepX : padding.left + plotW / 2,
+          y: padding.top + plotH - (val / maxVal) * plotH,
+          val
+        }));
+
+        if (points.length > 1) {
+          const grad = ctx.createLinearGradient(0, padding.top, 0, padding.top + plotH);
+          grad.addColorStop(0, 'rgba(16, 185, 129, 0.28)');
+          grad.addColorStop(1, 'rgba(16, 185, 129, 0.0)');
+
+          ctx.fillStyle = grad;
+          ctx.beginPath();
+          ctx.moveTo(points[0].x, padding.top + plotH);
+          points.forEach(p => ctx.lineTo(p.x, p.y));
+          ctx.lineTo(points[points.length - 1].x, padding.top + plotH);
+          ctx.closePath();
+          ctx.fill();
+
+          // Main line
+          ctx.strokeStyle = '#10b981';
+          ctx.lineWidth = 3;
+          ctx.lineJoin = 'round';
+          ctx.beginPath();
+          points.forEach((p, i) => {
+            if (i === 0) ctx.moveTo(p.x, p.y);
+            else ctx.lineTo(p.x, p.y);
+          });
+          ctx.stroke();
+        }
+
+        // Data dots & value labels
+        points.forEach(p => {
+          ctx.fillStyle = isDark ? '#0f172a' : '#ffffff';
+          ctx.strokeStyle = '#10b981';
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, 5, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+
+          ctx.fillStyle = isDark ? '#f8fafc' : '#0f172a';
+          ctx.font = '700 11px JetBrains Mono, monospace';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'bottom';
+          ctx.fillText(p.val, p.x, p.y - 8);
+        });
+      }
+    };
+
+    /**
+     * 4. MODE 2: RECRUITMENT BASIC MATH TEST ENGINE (Dynamic Generator)
+     */
+    const mathQuiz = {
+      isRunning: false,
+      questions: [],
+      userAnswers: [], // index 0..3 or null
+      doubts: [], // boolean
+      currentIndex: 0,
+      timeLeft: 600,
+      totalDuration: 600,
+      timerInterval: null,
+
+      syncDefaultTime() {
+        const count = parseInt(document.getElementById('cfg-math-count').value, 10);
+        const timeSelect = document.getElementById('cfg-math-time');
+        if (count === 10) timeSelect.value = '600';
+        else if (count === 20) timeSelect.value = '1200';
+        else if (count === 30) timeSelect.value = '1800';
+      },
+
+      randInt(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+      },
+
+      shuffle(arr) {
+        for (let i = arr.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+      },
+
+      buildOptions(correctVal, formatFn = (v) => String(v), spread = 5) {
+        const set = new Set([correctVal]);
+        let safety = 0;
+        while (set.size < 4 && safety < 50) {
+          safety++;
+          const delta = this.randInt(-spread, spread);
+          const candidate = correctVal + (delta === 0 ? 1 : delta);
+          if (candidate > 0 || correctVal <= 0) {
+            set.add(candidate);
+          }
+        }
+        const rawList = this.shuffle(Array.from(set));
+        return {
+          options: rawList.map(formatFn),
+          correctIndex: rawList.indexOf(correctVal)
+        };
+      },
+
+      // Generator Category 1: Deret Angka & Pola Bilangan
+      genSeriesQuestion() {
+        const type = this.randInt(1, 4);
+        if (type === 1) {
+          // Aritmatika bertingkat (+d1, +d2, +d3...)
+          const start = this.randInt(2, 15);
+          const baseDiff = this.randInt(2, 5);
+          const stepDiff = this.randInt(1, 3);
+          const seq = [start];
+          for (let i = 0; i < 5; i++) {
+            seq.push(seq[i] + baseDiff + i * stepDiff);
+          }
+          const ans = seq[5];
+          const shown = seq.slice(0, 5).join(', ') + ', ...';
+          const { options, correctIndex } = this.buildOptions(ans, (v) => String(v), 6);
+          return {
+            category: 'Deret Angka',
+            question: `Tentukan angka selanjutnya pada pola deret berikut:<br><span class="inline-block mt-2 px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 font-mono text-lg font-bold tracking-wider">${shown}</span>`,
+            options,
+            correctIndex,
+            explanation: `Pola menggunakan selisih bertingkat: +${baseDiff}, +${baseDiff + stepDiff}, +${baseDiff + 2 * stepDiff}, +${baseDiff + 3 * stepDiff}. Maka selisih berikutnya adalah +${baseDiff + 4 * stepDiff}, sehingga ${seq[4]} + ${baseDiff + 4 * stepDiff} = <strong>${ans}</strong>.`
+          };
+        } else if (type === 2) {
+          // Larik Ganda (2 pola selang-seling)
+          const a1 = this.randInt(3, 12);
+          const da = this.randInt(3, 7);
+          const b1 = this.randInt(20, 40);
+          const db = this.randInt(2, 5);
+          const seq = [a1, b1, a1 + da, b1 - db, a1 + 2 * da, b1 - 2 * db, a1 + 3 * da];
+          const ans = seq[6];
+          const shown = seq.slice(0, 6).join(', ') + ', ...';
+          const { options, correctIndex } = this.buildOptions(ans, (v) => String(v), 5);
+          return {
+            category: 'Deret Angka',
+            question: `Lanjutkan deret bilangan larik ganda berikut:<br><span class="inline-block mt-2 px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 font-mono text-lg font-bold tracking-wider">${shown}</span>`,
+            options,
+            correctIndex,
+            explanation: `Terdapat 2 pola selang-seling:<br>• Suku ganjil (ke-1, 3, 5, 7): selalu bertambah +${da} (${a1}, ${seq[2]}, ${seq[4]}, <strong>${ans}</strong>).<br>• Suku genap (ke-2, 4, 6): selalu berkurang -${db} (${b1}, ${seq[3]}, ${seq[5]}).`
+          };
+        } else if (type === 3) {
+          // Geometri / Perkalian
+          const start = this.randInt(2, 5);
+          const ratio = this.randInt(2, 3);
+          const seq = [start, start * ratio, start * ratio ** 2, start * ratio ** 3, start * ratio ** 4];
+          const ans = seq[4];
+          const shown = seq.slice(0, 4).join(', ') + ', ...';
+          const { options, correctIndex } = this.buildOptions(ans, (v) => String(v), 12);
+          return {
+            category: 'Deret Angka',
+            question: `Angka yang tepat untuk melengkapi deret geometri ini adalah:<br><span class="inline-block mt-2 px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 font-mono text-lg font-bold tracking-wider">${shown}</span>`,
+            options,
+            correctIndex,
+            explanation: `Setiap suku dikalikan dengan rasio tetap (×${ratio}). Maka suku ke-5 adalah ${seq[3]} × ${ratio} = <strong>${ans}</strong>.`
+          };
+        } else {
+          // Fibonacci modifikasi
+          const f1 = this.randInt(2, 6);
+          const f2 = this.randInt(3, 8);
+          const seq = [f1, f2];
+          for (let i = 2; i < 6; i++) seq.push(seq[i - 1] + seq[i - 2]);
+          const ans = seq[5];
+          const shown = seq.slice(0, 5).join(', ') + ', ...';
+          const { options, correctIndex } = this.buildOptions(ans, (v) => String(v), 7);
+          return {
+            category: 'Deret Angka',
+            question: `Tentukan bilangan berikutnya pada deret Fibonacci berikut:<br><span class="inline-block mt-2 px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 font-mono text-lg font-bold tracking-wider">${shown}</span>`,
+            options,
+            correctIndex,
+            explanation: `Pola Fibonacci menjumlahkan dua angka sebelumnya: ${seq[3]} + ${seq[4]} = <strong>${ans}</strong>.`
+          };
+        }
+      },
+
+      // Generator Category 2: Aritmatika Cepat, Persentase & Pecahan
+      genArithmeticQuestion() {
+        const type = this.randInt(1, 3);
+        if (type === 1) {
+          // Persentase dari bilangan
+          const pctOptions = [15, 20, 25, 30, 35, 40, 45, 60, 75];
+          const pct = pctOptions[this.randInt(0, pctOptions.length - 1)];
+          const base = this.randInt(4, 24) * 20;
+          const ans = (pct * base) / 100;
+          const { options, correctIndex } = this.buildOptions(ans, (v) => String(v), 15);
+          return {
+            category: 'Aritmatika & Persen',
+            question: `Berapakah hasil dari <strong>${pct}%</strong> dari <strong>${base}</strong>?`,
+            options,
+            correctIndex,
+            explanation: `(${pct} / 100) × ${base} = (${pct} × ${base}) / 100 = <strong>${ans}</strong>.`
+          };
+        } else if (type === 2) {
+          // Trik aljabar selisih kuadrat: a^2 - b^2 = (a+b)(a-b)
+          const b = this.randInt(12, 35);
+          const diff = this.randInt(2, 5);
+          const a = b + diff;
+          const ans = a * a - b * b;
+          const { options, correctIndex } = this.buildOptions(ans, (v) => String(v), 20);
+          return {
+            category: 'Aritmatika Cepat',
+            question: `Hitung cepat nilai dari: <span class="font-mono font-bold">${a}&sup2; &minus; ${b}&sup2;</span> = ...`,
+            options,
+            correctIndex,
+            explanation: `Gunakan sifat selisih kuadrat: a&sup2; &minus; b&sup2; = (a + b)(a &minus; b).<br>Maka (${a} + ${b}) × (${a} &minus; ${b}) = ${a + b} × ${diff} = <strong>${ans}</strong>.`
+          };
+        } else {
+          // Operasi campuran pecahan / desimal
+          const denom = [4, 5, 8, 10][this.randInt(0, 3)];
+          const num = this.randInt(1, denom - 1);
+          const mult = denom * this.randInt(4, 15);
+          const add = this.randInt(15, 50);
+          const ans = (num / denom) * mult + add;
+          const { options, correctIndex } = this.buildOptions(ans, (v) => String(v), 10);
+          return {
+            category: 'Pecahan & Operasi',
+            question: `Hasil dari <strong>(${num}/${denom} × ${mult}) + ${add}</strong> adalah ...`,
+            options,
+            correctIndex,
+            explanation: `Dahulukan perkalian: (${num}/${denom}) × ${mult} = ${num} × ${mult / denom} = ${(num / denom) * mult}. Kemudian ditambah ${add} = <strong>${ans}</strong>.`
+          };
+        }
+      },
+
+      // Generator Category 3: Soal Cerita Logika Matematika Rekrutmen
+      genWordQuestion() {
+        const type = this.randInt(1, 4);
+        if (type === 1) {
+          // Kecepatan, Jarak, Waktu
+          const speed = [40, 45, 50, 60, 75, 80][this.randInt(0, 5)];
+          const hours = [2, 2.5, 3, 3.5, 4][this.randInt(0, 4)];
+          const dist = speed * hours;
+          const { options, correctIndex } = this.buildOptions(dist, (v) => `${v} km`, 25);
+          return {
+            category: 'Soal Cerita (Jarak)',
+            question: `Sebuah mobil logistik perusahaan melaju dari Kota A ke Kota B dengan kecepatan rata-rata <strong>${speed} km/jam</strong> selama <strong>${hours} jam</strong> tanpa berhenti. Berapa jarak tempuh kedua kota tersebut?`,
+            options,
+            correctIndex,
+            explanation: `Rumus Jarak = Kecepatan × Waktu.<br>Jarak = ${speed} km/jam × ${hours} jam = <strong>${dist} km</strong>.`
+          };
+        } else if (type === 2) {
+          // Perbandingan Berbalik Nilai (Proyek & Pekerja)
+          const pairs = [
+            { w1: 12, d1: 20, w2: 15, d2: 16 },
+            { w1: 10, d1: 24, w2: 12, d2: 20 },
+            { w1: 15, d1: 12, w2: 18, d2: 10 },
+            { w1: 8, d1: 15, w2: 12, d2: 10 },
+            { w1: 20, d1: 18, w2: 24, d2: 15 }
+          ];
+          const p = pairs[this.randInt(0, pairs.length - 1)];
+          const { options, correctIndex } = this.buildOptions(p.d2, (v) => `${v} hari`, 4);
+          return {
+            category: 'Perbandingan Proyek',
+            question: `Suatu proyek renovasi kantor direncanakan selesai dalam <strong>${p.d1} hari</strong> jika dikerjakan oleh <strong>${p.w1} orang</strong> pekerja. Jika manajer proyek menambah pekerja menjadi <strong>${p.w2} orang</strong>, berapa hari proyek tersebut akan selesai?`,
+            options,
+            correctIndex,
+            explanation: `Ini adalah <strong>perbandingan berbalik nilai</strong> (semakin banyak pekerja, waktu semakin singkat):<br>(${p.w1} × ${p.d1}) / ${p.w2} = ${p.w1 * p.d1} / ${p.w2} = <strong>${p.d2} hari</strong>.`
+          };
+        } else if (type === 3) {
+          // Untung / Rugi / Diskon
+          const buyPrice = this.randInt(4, 15) * 20000;
+          const profitPct = [10, 15, 20, 25][this.randInt(0, 3)];
+          const sellPrice = buyPrice + (buyPrice * profitPct) / 100;
+          const fmtRp = (v) => `Rp ${v.toLocaleString('id-ID')}`;
+          const { options, correctIndex } = this.buildOptions(sellPrice, fmtRp, 15000);
+          return {
+            category: 'Aritmatika Sosial',
+            question: `Seorang pedagang membeli barang grosir seharga <strong>${fmtRp(buyPrice)}</strong>. Agar memperoleh keuntungan sebesar <strong>${profitPct}%</strong>, berapakah harga jual barang tersebut?`,
+            options,
+            correctIndex,
+            explanation: `Keuntungan = ${profitPct}% × ${fmtRp(buyPrice)} = ${fmtRp((buyPrice * profitPct) / 100)}.<br>Harga Jual = Modal + Untung = <strong>${fmtRp(sellPrice)}</strong>.`
+          };
+        } else {
+          // Waktu Kerja Bersama (1/t = 1/t1 + 1/t2)
+          const combos = [
+            { t1: 6, t2: 3, ans: 2 },
+            { t1: 12, t2: 4, ans: 3 },
+            { t1: 10, t2: 15, ans: 6 },
+            { t1: 20, t2: 30, ans: 12 },
+            { t1: 15, t2: 30, ans: 10 }
+          ];
+          const c = combos[this.randInt(0, combos.length - 1)];
+          const { options, correctIndex } = this.buildOptions(c.ans, (v) => `${v} jam`, 3);
+          return {
+            category: 'Logika Kerja Bersama',
+            question: `Mesin A mampu mencetak seluruh dokumen laporan dalam waktu <strong>${c.t1} jam</strong>, sedangkan Mesin B dapat menyelesaikan pekerjaan yang sama dalam <strong>${c.t2} jam</strong>. Jika kedua mesin dijalankan bersama-sama, berapa jam waktu yang dibutuhkan?`,
+            options,
+            correctIndex,
+            explanation: `Gunakan rumus kerja bersama: 1/t = 1/${c.t1} + 1/${c.t2}.<br>t = (${c.t1} × ${c.t2}) / (${c.t1} + ${c.t2}) = ${c.t1 * c.t2} / ${c.t1 + c.t2} = <strong>${c.ans} jam</strong>.`
+          };
+        }
+      },
+
+      start() {
+        soundFX.init();
+        app.currentMode = 'math';
+
+        const count = parseInt(document.getElementById('cfg-math-count').value, 10);
+        const duration = parseInt(document.getElementById('cfg-math-time').value, 10);
+        const topic = document.getElementById('cfg-math-topic').value;
+
+        this.questions = [];
+        for (let i = 0; i < count; i++) {
+          if (topic === 'series') {
+            this.questions.push(this.genSeriesQuestion());
+          } else if (topic === 'arithmetic') {
+            this.questions.push(this.genArithmeticQuestion());
+          } else if (topic === 'word') {
+            this.questions.push(this.genWordQuestion());
+          } else {
+            // Balanced mix across 3 topics
+            const mod = i % 3;
+            if (mod === 0) this.questions.push(this.genSeriesQuestion());
+            else if (mod === 1) this.questions.push(this.genArithmeticQuestion());
+            else this.questions.push(this.genWordQuestion());
+          }
+        }
+
+        this.userAnswers = new Array(count).fill(null);
+        this.doubts = new Array(count).fill(false);
+        this.currentIndex = 0;
+        this.totalDuration = duration;
+        this.timeLeft = duration;
+        this.isRunning = true;
+
+        app.switchView('view-math');
+        this.renderQuestion();
+        this.renderNavigator();
+        this.startTimer();
+      },
+
+      startTimer() {
+        this.stopTimer();
+        this.updateTimerUI();
+        this.timerInterval = setInterval(() => {
+          this.timeLeft--;
+          this.updateTimerUI();
+          if (this.timeLeft <= 0) {
+            this.finish();
+          }
+        }, 1000);
+      },
+
+      stopTimer() {
+        if (this.timerInterval) {
+          clearInterval(this.timerInterval);
+          this.timerInterval = null;
+        }
+      },
+
+      updateTimerUI() {
+        const mins = Math.floor(this.timeLeft / 60).toString().padStart(2, '0');
+        const secs = (this.timeLeft % 60).toString().padStart(2, '0');
+        const el = document.getElementById('math-timer');
+        el.textContent = `${mins}:${secs}`;
+        if (this.timeLeft <= 30) el.classList.add('text-rose-500');
+        else el.classList.remove('text-rose-500');
+      },
+
+      renderQuestion() {
+        const q = this.questions[this.currentIndex];
+        document.getElementById('math-category-badge').textContent = q.category;
+        document.getElementById('math-q-num').textContent = this.currentIndex + 1;
+        document.getElementById('math-q-total').textContent = this.questions.length;
+        document.getElementById('math-question-text').innerHTML = q.question;
+
+        const letters = ['A', 'B', 'C', 'D'];
+        const selected = this.userAnswers[this.currentIndex];
+
+        let optsHtml = '';
+        q.options.forEach((opt, idx) => {
+          const isSelected = (selected === idx);
+          optsHtml += `
+            <button onclick="mathQuiz.selectOption(${idx})" class="w-full text-left p-4 rounded-2xl border-2 transition flex items-center gap-3.5 ${
+              isSelected
+                ? 'border-blue-600 bg-blue-50 dark:bg-blue-950/50 text-blue-900 dark:text-blue-100 shadow-sm'
+                : 'border-slate-200 dark:border-slate-800 hover:border-blue-400 dark:hover:border-blue-700 bg-slate-50/50 dark:bg-slate-800/40'
+            }">
+              <span class="w-8 h-8 rounded-xl flex items-center justify-center font-bold text-sm shrink-0 ${
+                isSelected
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300'
+              }">
+                ${letters[idx]}
+              </span>
+              <span class="font-semibold text-sm md:text-base">${opt}</span>
+            </button>
+          `;
+        });
+        document.getElementById('math-options-container').innerHTML = optsHtml;
+
+        document.getElementById('btn-math-prev').disabled = (this.currentIndex === 0);
+        document.getElementById('btn-math-next').textContent = (this.currentIndex === this.questions.length - 1)
+          ? 'Selesai \u2713'
+          : 'Selanjutnya \u2192';
+      },
+
+      selectOption(optIdx) {
+        soundFX.playTap();
+        this.userAnswers[this.currentIndex] = optIdx;
+        this.renderQuestion();
+        this.renderNavigator();
+      },
+
+      toggleDoubt() {
+        soundFX.playTap();
+        this.doubts[this.currentIndex] = !this.doubts[this.currentIndex];
+        this.renderNavigator();
+      },
+
+      prev() {
+        if (this.currentIndex > 0) {
+          this.currentIndex--;
+          this.renderQuestion();
+          this.renderNavigator();
+        }
+      },
+
+      next() {
+        if (this.currentIndex < this.questions.length - 1) {
+          this.currentIndex++;
+          this.renderQuestion();
+          this.renderNavigator();
+        } else {
+          this.confirmFinish();
+        }
+      },
+
+      jumpTo(idx) {
+        this.currentIndex = idx;
+        this.renderQuestion();
+        this.renderNavigator();
+      },
+
+      renderNavigator() {
+        const grid = document.getElementById('math-nav-grid');
+        let html = '';
+        this.questions.forEach((_, idx) => {
+          const isCurrent = idx === this.currentIndex;
+          const isDoubt = this.doubts[idx];
+          const isAnswered = this.userAnswers[idx] !== null;
+
+          let bgClass = 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300';
+          if (isDoubt) bgClass = 'bg-amber-400 text-slate-900';
+          else if (isAnswered) bgClass = 'bg-blue-600 text-white';
+
+          const ringClass = isCurrent ? 'ring-2 ring-offset-2 ring-emerald-500 dark:ring-offset-slate-900' : '';
+
+          html += `
+            <button onclick="mathQuiz.jumpTo(${idx})" class="py-2 rounded-xl font-mono text-xs font-bold transition ${bgClass} ${ringClass}">
+              ${idx + 1}
+            </button>
+          `;
+        });
+        grid.innerHTML = html;
+      },
+
+      confirmFinish() {
+        const unanswered = this.userAnswers.filter(a => a === null).length;
+        const msg = unanswered > 0
+          ? `Masih ada ${unanswered} soal yang belum dijawab. Apakah Anda yakin ingin menyelesaikan tes dan melihat nilai?`
+          : 'Semua soal telah dijawab. Apakah Anda yakin ingin menyelesaikan tes sekarang?';
+
+        app.showModal('Selesaikan Tes Matematika?', msg, () => {
+          this.finish();
+        });
+      },
+
+      finish() {
+        this.isRunning = false;
+        this.stopTimer();
+        soundFX.playFinish();
+
+        let correct = 0;
+        let wrong = 0;
+        let empty = 0;
+
+        this.questions.forEach((q, idx) => {
+          const u = this.userAnswers[idx];
+          if (u === null) empty++;
+          else if (u === q.correctIndex) correct++;
+          else wrong++;
+        });
+
+        const total = this.questions.length;
+        const score = Math.round((correct / total) * 100);
+        const timeUsed = Math.max(1, this.totalDuration - this.timeLeft);
+        const avgTime = Math.round(timeUsed / total);
+
+        let grade = 'Perlu Latihan';
+        if (score >= 85) grade = 'Sangat Memuaskan (Lolos)';
+        else if (score >= 70) grade = 'Baik (Memenuhi Standar)';
+        else if (score >= 55) grade = 'Cukup';
+
+        document.getElementById('res-badge').textContent = 'Laporan Evaluasi Psikotes Numerik';
+        document.getElementById('res-title').textContent = 'Hasil Tes Matematika Dasar';
+        document.getElementById('res-subtitle').textContent = `Evaluasi kemampuan kuantitatif dan logika pemecahan masalah.`;
+
+        document.getElementById('math-res-score').textContent = score;
+        document.getElementById('math-res-grade').textContent = `Predikat: ${grade}`;
+        document.getElementById('math-res-correct').textContent = correct;
+        document.getElementById('math-res-total-q').textContent = total;
+        document.getElementById('math-res-wrong').textContent = `${wrong} / ${empty}`;
+        document.getElementById('math-res-avgtime').textContent = `${avgTime}d`;
+
+        document.getElementById('res-kraepelin-body').classList.add('hidden');
+        document.getElementById('res-math-body').classList.remove('hidden');
+
+        this.renderReviewList('all');
+        app.switchView('view-results');
+      },
+
+      filterReview(filterType) {
+        this.renderReviewList(filterType);
+      },
+
+      renderReviewList(filterType) {
+        const container = document.getElementById('math-review-list');
+        const letters = ['A', 'B', 'C', 'D'];
+        let html = '';
+
+        this.questions.forEach((q, idx) => {
+          const u = this.userAnswers[idx];
+          const isCorrect = (u === q.correctIndex);
+          if (filterType === 'wrong' && isCorrect) return;
+
+          const statusBadge = isCorrect
+            ? `<span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300">Benar</span>`
+            : u === null
+              ? `<span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300">Kosong</span>`
+              : `<span class="px-2.5 py-1 rounded-lg text-xs font-bold bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-300">Salah</span>`;
+
+          const userAnsText = u !== null ? `${letters[u]}. ${q.options[u]}` : 'Tidak dijawab';
+          const correctAnsText = `${letters[q.correctIndex]}. ${q.options[q.correctIndex]}`;
+
+          html += `
+            <div class="p-5 rounded-2xl border ${isCorrect ? 'border-slate-200 dark:border-slate-800' : 'border-rose-200 dark:border-rose-900/60'} bg-slate-50/60 dark:bg-slate-800/30 space-y-3">
+              <div class="flex items-center justify-between gap-2">
+                <span class="text-xs font-bold text-slate-500">Soal #${idx + 1} &bull; ${q.category}</span>
+                ${statusBadge}
+              </div>
+              <div class="text-sm font-semibold text-slate-800 dark:text-slate-100">${q.question}</div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                <div class="p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                  <span class="text-slate-400 block mb-0.5">Jawaban Anda:</span>
+                  <span class="font-bold ${isCorrect ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}">${userAnsText}</span>
+                </div>
+                <div class="p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                  <span class="text-slate-400 block mb-0.5">Kunci Jawaban:</span>
+                  <span class="font-bold text-emerald-600 dark:text-emerald-400">${correctAnsText}</span>
+                </div>
+              </div>
+              <div class="p-3.5 rounded-xl bg-blue-50/70 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/50 text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
+                <strong class="text-blue-700 dark:text-blue-300 block mb-1">Pembahasan:</strong>
+                ${q.explanation}
+              </div>
+            </div>
+          `;
+        });
+
+        container.innerHTML = html || `<p class="text-center text-sm text-slate-500 py-6">Luar biasa! Tidak ada jawaban yang salah.</p>`;
+      }
+    };
+
+    // Bootstrap application on load
+    window.addEventListener('DOMContentLoaded', () => {
+      app.init();
+    });
+  </script>
+</body>
+</html>
